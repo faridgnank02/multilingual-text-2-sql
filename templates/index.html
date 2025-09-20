@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Assistant SQL Multilingue</title>
+</head>
+<body>
+    <h2>Assistant SQL Multilingue</h2>
+    <form method="post">
+        <label for="question">Pose ta question en langage naturel :</label><br>
+        <input type="text" id="question" name="question" style="width:400px;" required>
+        <button type="submit">Envoyer</button>
+    </form>
+    {% if sql_query %}
+        <h3>Requête SQL générée :</h3>
+        <pre>{{ sql_query }}</pre>
+    {% endif %}
+    {% if results %}
+        <h3>Résultats :</h3>
+        <pre>{{ results }}</pre>
+    {% endif %}
+    {% if error_msg %}
+        <h3 style="color:red;">Erreur :</h3>
+        <pre>{{ error_msg }}</pre>
+    {% endif %}
+</body>
+</html>

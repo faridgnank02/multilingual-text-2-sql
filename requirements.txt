@@ -1,0 +1,11 @@
+faiss-cpu
+langchain
+langchain-core
+langchain-openai
+langgraph
+langchain-community
+pydantic>=2
+typing_extensions
+python-dotenv
+mlflow
+beautifulsoup4

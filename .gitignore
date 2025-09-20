@@ -1,0 +1,12 @@
+.env
+data/
+mlartifacts/
+mlruns/
+*.db
+*.pkl
+*.faiss
+*.npy
+__pycache__/
+*.pyc
+venv/
+*.log
