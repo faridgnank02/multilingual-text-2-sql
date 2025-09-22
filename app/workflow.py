@@ -6,7 +6,7 @@ from typing_extensions import TypedDict
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 
-from sql_generation import get_sql_gen_chain
+from app.sql_generation import get_sql_gen_chain
 
 # Set up module logger
 _logger = logging.getLogger(__name__)

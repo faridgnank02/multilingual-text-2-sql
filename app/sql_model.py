@@ -1,5 +1,5 @@
 import mlflow
-from workflow import get_workflow
+from app.workflow import get_workflow
 from typing import Any, List, Dict
 
 class SQLGenerator(mlflow.pyfunc.PythonModel):
