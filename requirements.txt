@@ -9,3 +9,4 @@ typing_extensions
 python-dotenv
 mlflow
 beautifulsoup4
+pytest

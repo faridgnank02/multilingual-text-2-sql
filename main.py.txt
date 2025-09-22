@@ -3,9 +3,9 @@ import logging
 import mlflow
 from dotenv import load_dotenv
 
-from app.database import setup_database
-from app.vector_store import setup_vector_store
-from app.definitions import (
+from database import setup_database
+from vector_store import setup_vector_store
+from definitions import (
     EXPERIMENT_NAME,
     MODEL_ALIAS,
     REGISTERED_MODEL_NAME,
@@ -21,7 +21,8 @@ mlflow.set_experiment(EXPERIMENT_NAME)
 # Enable LangChain autologging for tracing
 try:
     mlflow.langchain.autolog()
-except Exception:  
+except Exception:
+    # If autologging isn't available or fails, just continue
     pass
 
 # ===============================
@@ -78,15 +79,15 @@ def main():
         _logger.warning("Could not save workflow diagram: %s", str(e))
 
     # ===============================
-    # Interactive CLI loop with MLflow tracking
+    # Interactive CLI loop
     # ===============================
     _logger.info("Welcome to the SQL Assistant!")
-    run_idx = 1
     while True:
         question = input("\nEnter your SQL question (or type 'exit' to quit): ")
         if question.lower() == "exit":
             break
 
+        # Initial workflow state
         initial_state = {
             "messages": [("user", question)],
             "iterations": 0,
@@ -98,56 +99,36 @@ def main():
             "database_schema": "",
         }
 
-        # === MLflow tracking for each query ===
-        with mlflow.start_run(run_name=f"sql_generation_run_{run_idx}"):
-            mlflow.log_param("question", question)
+        # Run workflow
+        solution = app.invoke(initial_state)
 
-            # Optionally log database schema for traceability
-            try:
-                cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-                tables = cursor.fetchall()
-                mlflow.log_param("database_tables", str([t[0] for t in tables]))
-            except Exception:
-                pass
+        # ===============================
+        # Error Handling
+        # ===============================
+        if solution.get("error") == "yes":
+            _logger.info("\nAssistant Message:\n")
+            _logger.info(solution.get("messages", [])[-1][1])
+            continue
 
-            import time
-            start_time = time.time()
-            solution = app.invoke(initial_state)
-            duration = time.time() - start_time
-            mlflow.log_metric("duration_seconds", duration)
+        # ===============================
+        # Extract Generated SQL
+        # ===============================
+        gen = solution.get("generation")
+        sql_query = getattr(gen, "sql_code", None) if gen is not None else None
+        _logger.info("\nGenerated SQL Query:\n")
+        _logger.info(sql_query or "(No SQL returned)")
 
-            if solution.get("error") == "yes":
-                mlflow.log_param("error", solution.get("messages", [])[-1][1])
-                _logger.info("\nAssistant Message:\n")
-                _logger.info(solution.get("messages", [])[-1][1])
-                run_idx += 1
-                continue
-
-            gen = solution.get("generation")
-            sql_query = getattr(gen, "sql_code", None) if gen is not None else None
-            mlflow.log_param("sql_query", sql_query or "(No SQL returned)")
-
-            # Log translated input if available
-            translated_input = solution.get("translated_input", "")
-            if translated_input:
-                mlflow.log_param("translated_input", translated_input)
-
-            if solution.get("no_records_found"):
-                mlflow.log_param("no_records_found", True)
-                _logger.info("\nNo records found matching your query.")
-            elif solution.get("results") is not None:
-                # Save results as artifact
-                import tempfile, json
-                with tempfile.NamedTemporaryFile("w", delete=False, suffix=".json") as f:
-                    json.dump(solution["results"], f)
-                    mlflow.log_artifact(f.name, artifact_path="results")
-                _logger.info("\nQuery Results:\n")
-                for row in solution["results"]:
-                    _logger.info(row)
-            else:
-                _logger.info("\nNo results returned or query did not execute successfully.")
-
-        run_idx += 1
+        # ===============================
+        # Display Results
+        # ===============================
+        if solution.get("no_records_found"):
+            _logger.info("\nNo records found matching your query.")
+        elif solution.get("results") is not None:
+            _logger.info("\nQuery Results:\n")
+            for row in solution["results"]:
+                _logger.info(row)
+        else:
+            _logger.info("\nNo results returned or query did not execute successfully.")
 
     _logger.info("Goodbye!")
 

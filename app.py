@@ -3,9 +3,9 @@ import mlflow
 from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
 
-from database import setup_database
-from vector_store import setup_vector_store
-from definitions import (
+from app.database import setup_database
+from app.vector_store import setup_vector_store
+from app.definitions import (
     EXPERIMENT_NAME,
     MODEL_ALIAS,
     REGISTERED_MODEL_NAME,

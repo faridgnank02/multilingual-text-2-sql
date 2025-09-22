@@ -1,11 +1,11 @@
 import mlflow
-from definitions import (
+from app.definitions import (
     EXPERIMENT_NAME,
     REGISTERED_MODEL_NAME,
     MODEL_ALIAS,
     REMOTE_SERVER_URI
 )
-from sql_model import SQLGenerator  # Import the model class
+from app.sql_model import SQLGenerator  # Import the model class
 
 from dotenv import load_dotenv
 

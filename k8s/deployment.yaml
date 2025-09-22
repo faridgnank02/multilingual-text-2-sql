@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multilingual-text-2-sql
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: multilingual-text-2-sql
+  template:
+    metadata:
+      labels:
+        app: multilingual-text-2-sql
+    spec:
+      containers:
+      - name: multilingual-text-2-sql
+        image: your-dockerhub-username/multilingual-text-2-sql:latest
+        ports:
+        - containerPort: 5001
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-secret
+              key: OPENAI_API_KEY

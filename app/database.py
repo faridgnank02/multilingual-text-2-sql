@@ -3,7 +3,7 @@ import os
 import sqlite3
 from typing import Optional
 
-DB_PATH = "data/database.db"
+DB_PATH = "../data/database.db"
 
 def create_connection(db_file: str = DB_PATH) -> sqlite3.Connection:
     """Create a database connection to the SQLite database."""

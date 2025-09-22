@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-VSTORE_DIR = "data/vector_store"
+VSTORE_DIR = "../data/vector_store"
 
 def setup_vector_store(logger: Optional[logging.Logger] = None):
     """Setup or load the vector store (FAISS)."""
