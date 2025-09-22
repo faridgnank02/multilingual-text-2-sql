@@ -21,9 +21,11 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
+
       - name: Run tests
-        run: |
-          pytest tests/
+        run: pytest tests/
 
       - name: Build Docker image
         run: docker build -t multilingual-text-2-sql .
