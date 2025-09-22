@@ -12,13 +12,30 @@ load_dotenv()
 
 VSTORE_DIR = "../data/vector_store"
 
+# def setup_vector_store(logger: Optional[logging.Logger] = None):
+#     """Setup or load the vector store (FAISS)."""
+#     if logger is None:
+#         logger = logging.getLogger(__name__)
+#     if not os.path.exists("data"):
+#         os.makedirs("data")
+#     vector_store_dir = VSTORE_DIR
+#     if os.path.exists(vector_store_dir):
+#         # Load the vector store from disk
+#         logger.info("Loading vector store from disk...")
+#         vector_store = FAISS.load_local(
+#             vector_store_dir,
+#             OpenAIEmbeddings(),
+#             allow_dangerous_deserialization=True,
+#         )
 def setup_vector_store(logger: Optional[logging.Logger] = None):
     """Setup or load the vector store (FAISS)."""
     if logger is None:
         logger = logging.getLogger(__name__)
-    if not os.path.exists("data"):
-        os.makedirs("data")
-    vector_store_dir = VSTORE_DIR
+    # Chemin absolu du dossier data
+    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data"))
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+    vector_store_dir = os.path.join(data_dir, "vector_store")
     if os.path.exists(vector_store_dir):
         # Load the vector store from disk
         logger.info("Loading vector store from disk...")

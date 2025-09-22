@@ -143,9 +143,11 @@ def setup_database(logger: Optional[logging.Logger] = None) -> sqlite3.Connectio
     """Setup the database and return the connection."""
     if logger is None:
         logger = logging.getLogger(__name__)
-    db_file = DB_PATH
-    if not os.path.exists("data"):
-        os.makedirs("data")
+    # Chemin absolu du dossier data
+    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data"))
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+    db_file = os.path.join(data_dir, "database.db")
     db_exists = os.path.exists(db_file)
     conn = create_connection(db_file)
     if not db_exists:
