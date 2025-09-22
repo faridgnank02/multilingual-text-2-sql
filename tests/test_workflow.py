@@ -1,4 +1,4 @@
-from app.workflow import build_workflow
+from app.workflow import get_workflow
 from app.database import setup_database
 from app.vector_store import setup_vector_store
 
@@ -6,7 +6,7 @@ def test_workflow_invoke():
     conn = setup_database()
     cursor = conn.cursor()
     vector_store = setup_vector_store()
-    workflow = build_workflow(conn, cursor, vector_store)
+    workflow = get_workflow(conn, cursor, vector_store)
     initial_state = {
         "messages": [("user", "How many customers per country?")],
         "iterations": 0,
