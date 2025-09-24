@@ -204,22 +204,33 @@ def get_workflow(conn, cursor, vector_store):
         sql_code = getattr(sql_solution, "sql_code", "").strip()
         results = None
         no_records_found = False
+        generated_answer = None
         try:
             cursor.execute(sql_code)
             if sql_code.upper().startswith("SELECT"):
                 results = cursor.fetchall()
                 if not results:
                     no_records_found = True
+                    generated_answer = "No records found for your query."
                     _logger.info("SQL query execution: success. No records found.")
                 else:
+                    # Génère une phrase-réponse à partir des résultats
+                    # Ex : "There are X users in the database." ou "The result is ..."
+                    if len(results) == 1 and len(results[0]) == 1:
+                        generated_answer = f"The answer is: {results[0][0]}"
+                    else:
+                        generated_answer = f"The result is: {results}"
                     _logger.info("SQL query execution: success.")
             else:
                 conn.commit()
+                generated_answer = "Query executed successfully. Changes committed."
                 _logger.info("SQL query execution: success. Changes committed.")
         except Exception as e:
+            generated_answer = f"Error executing SQL query: {e}"
             _logger.error("SQL query execution failed. Error: %s", e)
         state["results"] = results
         state["no_records_found"] = no_records_found
+        state["generated_answer"] = generated_answer
         return state
 
     def decide_next_step(state: GraphState) -> str:
@@ -237,7 +248,18 @@ def get_workflow(conn, cursor, vector_store):
             _logger.info("Error detected. Retrying SQL query generation.")
             return "generate"
 
-    # --- Build the workflow graph ---
+    def translate_answer(state: GraphState) -> GraphState:
+        """Translate the generated answer to the language of the user's question."""
+        _logger.info("Translating generated answer to user's language.")
+        generated_answer = state.get("generated_answer", "")
+        # Détecte la langue de la question originale
+        user_input = state["messages"][0][1]
+        # Utilise l'API OpenAI pour traduire la réponse dans la langue de la question
+        prompt = f"Translate the following answer to the language of this question.\nQuestion: {user_input}\nAnswer: {generated_answer}"
+        translation = llm.invoke(prompt)
+        translated = getattr(translation, "content", "").strip()
+        state["generated_answer"] = translated
+        return state
     workflow = StateGraph(GraphState)
     workflow.add_node("translate_input", translate_input)
     workflow.add_node("pre_safety_check", pre_safety_check)
@@ -247,6 +269,7 @@ def get_workflow(conn, cursor, vector_store):
     workflow.add_node("post_safety_check", post_safety_check)
     workflow.add_node("sql_check", sql_check)
     workflow.add_node("run_query", run_query)
+    workflow.add_node("translate_answer", translate_answer)
 
     workflow.add_edge(START, "translate_input")
     workflow.add_edge("translate_input", "pre_safety_check")
@@ -276,7 +299,8 @@ def get_workflow(conn, cursor, vector_store):
             END: END
         }
     )
-    workflow.add_edge("run_query", END)
+    workflow.add_edge("run_query", "translate_answer")
+    workflow.add_edge("translate_answer", END)
 
     app = workflow.compile()
     return app

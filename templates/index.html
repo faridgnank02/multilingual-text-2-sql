@@ -1,27 +1,57 @@
-<!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Assistant SQL Multilingue</title>
+    <title>Multilingual SQL Assistant</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+        .container { max-width: 700px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px #ccc; }
+    h2 { color: #2c3e50; }
+    label { font-weight: bold; }
+    input[type="text"] { padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc; }
+    button { background: #2980b9; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #3498db; }
+    .section { margin-top: 25px; }
+    pre { background: #f4f4f4; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-break: break-word; max-width: 100%; overflow-x: auto; }
+    .error { color: red; }
+    </style>
 </head>
 <body>
-    <h2>Assistant SQL Multilingue</h2>
-    <form method="post">
-        <label for="question">Pose ta question en langage naturel :</label><br>
-        <input type="text" id="question" name="question" style="width:400px;" required>
-        <button type="submit">Envoyer</button>
-    </form>
-    {% if sql_query %}
-        <h3>Requête SQL générée :</h3>
-        <pre>{{ sql_query }}</pre>
-    {% endif %}
-    {% if results %}
-        <h3>Résultats :</h3>
-        <pre>{{ results }}</pre>
-    {% endif %}
-    {% if error_msg %}
-        <h3 style="color:red;">Erreur :</h3>
-        <pre>{{ error_msg }}</pre>
-    {% endif %}
+    <div class="container">
+        <h2>Multilingual SQL Assistant</h2>
+        <form method="post" enctype="multipart/form-data">
+            <label for="question">Ask your question in natural language:</label><br>
+            <input type="text" id="question" name="question" style="width:400px;" required>
+            <button type="submit">Send</button>
+        </form>
+        <form method="post" enctype="multipart/form-data" class="section">
+            <label for="table_file">Attach a SQL table (.csv or .sql):</label><br>
+            <input type="file" id="table_file" name="table_file" accept=".csv,.sql">
+            <button type="submit">Import table</button>
+        </form>
+        {% if generated_answer %}
+            <div class="section">
+                <h3>Generated answer:</h3>
+                <pre>{{ generated_answer }}</pre>
+            </div>
+        {% endif %}
+        {% if sql_query %}
+            <div class="section">
+                <h3>Generated SQL query:</h3>
+                <pre>{{ sql_query }}</pre>
+            </div>
+        {% endif %}
+        {% if results %}
+            <div class="section">
+                <h3>Results:</h3>
+                <pre>{{ results }}</pre>
+            </div>
+        {% endif %}
+        {% if error_msg %}
+            <div class="section error">
+                <h3>Error:</h3>
+                <pre>{{ error_msg }}</pre>
+            </div>
+        {% endif %}
+    </div>
 </body>
 </html>
