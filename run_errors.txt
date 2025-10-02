@@ -2,7 +2,7 @@ Run pytest tests/
 ============================= test session starts ==============================
 platform linux -- Python 3.12.11, pytest-8.4.2, pluggy-1.6.0
 rootdir: /home/runner/work/multilingual-text-2-sql/multilingual-text-2-sql
-plugins: anyio-4.10.0, langsmith-0.4.30
+plugins: anyio-4.11.0, langsmith-0.4.31
 collected 4 items
 
 tests/test_database.py .                                                 [ 25%]
@@ -37,7 +37,7 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
 self = <Popen: returncode: None args: ['python', 'main.py']>
-endtime = 99.443134339, orig_timeout = 10, stdout_seq = [], stderr_seq = []
+endtime = 98.493741117, orig_timeout = 10, stdout_seq = [], stderr_seq = []
 skip_check_and_raise = False
 
     def _check_timeout(self, endtime, orig_timeout, stdout_seq, stderr_seq,
@@ -87,12 +87,12 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 app/vector_store.py:70: in setup_vector_store
     embedding_model = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/langchain_openai/embeddings/base.py:328: in validate_environment
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/langchain_openai/embeddings/base.py:331: in validate_environment
     self.client = openai.OpenAI(**client_params, **sync_specific).embeddings  # type: ignore[arg-type]
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <openai.OpenAI object at 0x7fa0c2c38530>
+self = <openai.OpenAI object at 0x7f5e4fec99a0>
 
     def __init__(
         self,
@@ -151,12 +151,12 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 app/vector_store.py:70: in setup_vector_store
     embedding_model = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/langchain_openai/embeddings/base.py:328: in validate_environment
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/langchain_openai/embeddings/base.py:331: in validate_environment
     self.client = openai.OpenAI(**client_params, **sync_specific).embeddings  # type: ignore[arg-type]
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <openai.OpenAI object at 0x7fa0d50e7ec0>
+self = <openai.OpenAI object at 0x7f5e4f9e9940>
 
     def __init__(
         self,
@@ -207,4 +207,4 @@ FAILED tests/test_main.py::test_main_cli_help - AssertionError: main.py n'a pas 
 assert False
 FAILED tests/test_vector_store.py::test_vector_store_load - openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
 FAILED tests/test_workflow.py::test_workflow_invoke - openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
-=================== 3 failed, 1 passed in 749.93s (0:12:29) ====================
+=================== 3 failed, 1 passed in 537.83s (0:08:57) ====================

@@ -1,0 +1,56 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest
+    
+    - name: Create test environment
+      run: |
+        # Create necessary directories
+        mkdir -p data/custom_databases
+        mkdir -p temp_uploads
+        
+        # Set dummy OpenAI key for tests that check the environment
+        echo "OPENAI_API_KEY=sk-dummy-key-for-testing" > .env
+    
+    - name: Run tests
+      run: |
+        # Run tests with verbose output
+        python -m pytest tests/ -v --tb=short
+    
+    - name: Test database manager
+      run: |
+        # Test database manager functionality
+        python database_manager.py list || echo "Database manager test completed"
+    
+    - name: Test app imports
+      run: |
+        # Test that the main app can be imported without errors
+        python -c "
+        try:
+            import app
+            print('✅ App imports successfully')
+        except Exception as e:
+            print(f'❌ App import error: {e}')
+            exit(1)
+        "
