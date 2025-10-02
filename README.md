@@ -208,7 +208,7 @@ multilingual-text-2-sql/
 └── .github/workflows/        # CI/CD pipeline
 ```
 
-### 🔧 Tech Stack
+### Tech Stack
 - **Backend**: Flask, Python 3.8+
 - **AI/ML**: OpenAI GPT-4o-mini, LangChain, LangGraph
 - **Database**: SQLite with dynamic schema support
@@ -245,7 +245,7 @@ mlruns/
     └── sql_generator_model/
 ```
 
-## 🧪 Testing & Quality Assurance
+## Testing & Quality Assurance
 
 ### Run Tests
 ```bash
