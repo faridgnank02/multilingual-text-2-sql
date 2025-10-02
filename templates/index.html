@@ -4,36 +4,106 @@
     <title>Multilingual SQL Assistant</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
-        .container { max-width: 700px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px #ccc; }
-    h2 { color: #2c3e50; }
-    label { font-weight: bold; }
-    input[type="text"] { padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc; }
-    button { background: #2980b9; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #3498db; }
-    .section { margin-top: 25px; }
-    pre { background: #f4f4f4; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-break: break-word; max-width: 100%; overflow-x: auto; }
-    .error { color: red; }
+        .container { max-width: 800px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px #ccc; }
+        h2 { color: #2c3e50; }
+        h3 { color: #2c3e50; margin-bottom: 15px; }
+        label { font-weight: bold; }
+        input[type="text"], input[type="file"] { padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc; }
+        input[type="file"] { padding: 5px; width: 100%; max-width: 400px; }
+        button { background: #2980b9; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #3498db; }
+        button[style*="background: #27ae60"] { background: #27ae60 !important; }
+        button[style*="background: #27ae60"]:hover { background: #2ecc71 !important; }
+        .section { margin-top: 25px; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-break: break-word; max-width: 100%; overflow-x: auto; }
+        .error { color: red; }
+        .success { color: #27ae60; background: #d5edda; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .upload-section { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #27ae60; }
+        .file-info { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
+        .form-group { margin-bottom: 15px; }
+        .checkbox-group { margin: 15px 0; }
+        .divider { border-top: 2px solid #ecf0f1; padding-top: 20px; margin-top: 30px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Multilingual SQL Assistant</h2>
+        {% if active_db_name %}
+            <div class="section" style="background: #e8f4fd; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+                <h4 style="margin: 0; color: #2980b9;">📊 Base de données active</h4>
+                <p style="margin: 5px 0 0 0; color: #34495e;">{{ active_db_name }} <code>({{ active_db_key }})</code></p>
+            </div>
+        {% endif %}
+        <!-- Formulaire de questions -->
         <form method="post" enctype="multipart/form-data">
             <label for="question">Ask your question in natural language:</label><br>
             <input type="text" id="question" name="question" style="width:400px;" required>
-            <button type="submit">Send</button>
+            <button type="submit" name="action" value="question">Send</button>
         </form>
-        <form method="post" enctype="multipart/form-data" class="section">
-            <label for="table_file">Attach a SQL table (.csv or .sql):</label><br>
-            <input type="file" id="table_file" name="table_file" accept=".csv,.sql">
-            <button type="submit">Import table</button>
-        </form>
-        {% if generated_answer %}
-            <div class="section">
-                <h3>Generated answer:</h3>
-                <pre>{{ generated_answer }}</pre>
+        
+        <!-- Formulaire d'upload de base de données -->
+        <div class="section divider">
+            <div class="upload-section">
+                <h3>📊 Import a new database</h3>
+                <p style="margin-bottom: 20px; color: #5a6c7d;">Upload your own CSV, SQL script, or SQLite database to start asking questions about your data.</p>
+                
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
+                    <div class="form-group">
+                        <label for="db_file"><strong>Choose your database file:</strong></label><br>
+                        <input type="file" id="db_file" name="db_file" accept=".csv,.sql,.db,.sqlite,.sqlite3" required>
+                        <div class="file-info">
+                            📁 Supported formats: CSV, SQL script, SQLite database (.db, .sqlite, .sqlite3) • Max size: 50MB
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="db_name"><strong>Database name:</strong></label><br>
+                        <input type="text" id="db_name" name="db_name" placeholder="e.g., my_sales_data, customer_db..." style="width:300px;" required>
+                        <div class="file-info">
+                            This name will be used to identify your database in the system
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="tableNameDiv" style="display:none;">
+                        <label for="table_name"><strong>Table name (for CSV):</strong></label><br>
+                        <input type="text" id="table_name" name="table_name" placeholder="Leave empty to use filename" style="width:300px;">
+                        <div class="file-info">
+                            Optional: specify a custom table name for CSV files
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="auto_activate" name="auto_activate" checked> 
+                            <strong>Automatically switch to this database after import</strong>
+                        </label>
+                        <div class="file-info">
+                            If checked, you'll be able to immediately start asking questions about this data
+                        </div>
+                    </div>
+                    
+                    <button type="submit" name="action" value="upload" style="background: #27ae60;">
+                        📤 Import Database
+                    </button>
+                </form>
             </div>
-        {% endif %}
+        </div>
+        
+        <script>
+            // Show table name field only for CSV files
+            document.getElementById('db_file').addEventListener('change', function(e) {
+                const fileName = e.target.files[0]?.name || '';
+                const tableNameDiv = document.getElementById('tableNameDiv');
+                if (fileName.toLowerCase().endsWith('.csv')) {
+                    tableNameDiv.style.display = 'block';
+                    // Auto-fill table name based on filename
+                    const tableName = fileName.replace(/\.[^/.]+$/, ""); // Remove extension
+                    document.getElementById('table_name').value = tableName;
+                } else {
+                    tableNameDiv.style.display = 'none';
+                }
+            });
+        </script>
         {% if sql_query %}
             <div class="section">
                 <h3>Generated SQL query:</h3>
@@ -50,6 +120,12 @@
             <div class="section error">
                 <h3>Error:</h3>
                 <pre>{{ error_msg }}</pre>
+            </div>
+        {% endif %}
+        {% if generated_answer %}
+            <div class="section">
+                <h3>Query Explanation:</h3>
+                <pre>{{ generated_answer }}</pre>
             </div>
         {% endif %}
     </div>
