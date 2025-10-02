@@ -3,9 +3,10 @@ import pytest
 from app.vector_store import setup_vector_store
 
 def test_vector_store_load():
-    # Skip test if no OpenAI API key is available (e.g., in CI environment)
-    if not os.getenv("OPENAI_API_KEY"):
-        pytest.skip("OpenAI API key not available - skipping vector store test")
+    # Skip test if no OpenAI API key is available or if it's a dummy key (e.g., in CI environment)
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key or api_key.startswith("sk-dummy"):
+        pytest.skip("Valid OpenAI API key not available - skipping vector store test")
     
     vector_store = setup_vector_store()
     assert vector_store is not None
