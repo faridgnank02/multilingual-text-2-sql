@@ -1,7 +1,7 @@
 # 🌐 Multilingual Text-to-SQL Generator
 
 A comprehensive web application that converts **Access the application**: [http://localhost:5000](http://localhost:5000)
-📊 **Monitor experiments**: MLflow UI at [htt### 🔧 Tech Stack
+ **Monitor experiments**: MLflow UI at [htt### 🔧 Tech Stack
 - **Backend**: Flask, Python 3.8+
 - **AI/ML**: OpenAI GPT-4o-mini, LangChain, LangGraph
 - **Database**: SQLite with dynamic schema support
@@ -10,7 +10,7 @@ A comprehensive web application that converts **Access the application**: [http:
 - **Testing**: pytest with comprehensive coverage
 - **CI/CD**: GitHub Actions with automated testing
 
-## 📊 MLflow Integration
+## MLflow Integration
 
 The application uses MLflow for model management and experiment tracking:
 
@@ -40,7 +40,7 @@ mlruns/
 
 ## Key Features
 
-### 🌍 **Multilingual Support**
+### **Multilingual Support**
 - **Multi-language support**: French, English, Spanish, German, and many more languages supported by GPT-4o-mini
 - **Auto-detection**: Automatically detects input language
 - **Smart translation**: Translates to English for optimal SQL generation
