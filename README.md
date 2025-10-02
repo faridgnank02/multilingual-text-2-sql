@@ -1,46 +1,10 @@
 # 🌐 Multilingual Text-to-SQL Generator
 
-A comprehensive web application that converts **Access the application**: [http://localhost:5000](http://localhost:5000)
- **Monitor experiments**: MLflow UI at [htt### 🔧 Tech Stack
-- **Backend**: Flask, Python 3.8+
-- **AI/ML**: OpenAI GPT-4o-mini, LangChain, LangGraph
-- **Database**: SQLite with dynamic schema support
-- **Search**: FAISS vector store for semantic search
-- **ML Ops**: MLflow for model management and experiment tracking
-- **Testing**: pytest with comprehensive coverage
-- **CI/CD**: GitHub Actions with automated testing
-
-## MLflow Integration
-
-The application uses MLflow for model management and experiment tracking:
-
-### Starting MLflow
-```bash
-# Launch MLflow server (required)
-mlflow ui
-
-# Access MLflow UI
-open http://localhost:5000
-```
-
-### Features
-- **Model Versioning**: Track different versions of the SQL generation model
-- **Experiment Tracking**: Monitor query generation performance
-- **Model Registry**: Centralized model management
-- **Metrics Logging**: Track query success rates and processing times
-
-### MLflow Directory Structure
-```
-mlruns/
-├── 0/                      # Default experiment
-├── experiments/            # Custom experiments  
-└── models/                # Registered models
-    └── sql_generator_model/
-```lhost:5000](http://localhost:5000) (if running)atural language questions (in multiple languages) into SQL queries and executes them on customizable databases. Built with Flask, LangChain, LangGraph, OpenAI GPT-4o-mini, and FAISS vector search.
+A comprehensive web application that converts natural language questions (in multiple languages) into SQL queries and executes them on customizable databases. Built with Flask, LangChain, LangGraph, OpenAI GPT-4o-mini, and FAISS vector search.
 
 ## Key Features
 
-### **Multilingual Support**
+### 🌍 **Multilingual Support**
 - **Multi-language support**: French, English, Spanish, German, and many more languages supported by GPT-4o-mini
 - **Auto-detection**: Automatically detects input language
 - **Smart translation**: Translates to English for optimal SQL generation
@@ -132,9 +96,10 @@ python3 database_manager.py activate bibliotheque
 python3 app.py
 ```
 
- **Access the application**: [http://localhost:5000](http://localhost:5000)
+🌐 **Access the application**: [http://localhost:5000](http://localhost:5000)
+📊 **Monitor experiments**: MLflow UI at [http://localhost:5000](http://localhost:5000) (if running)
 
-##  Database Management
+## Database Management
 
 ### Web Interface Upload
 Upload databases directly through the web interface:
@@ -243,16 +208,44 @@ multilingual-text-2-sql/
 └── .github/workflows/        # CI/CD pipeline
 ```
 
-### Tech Stack
+### 🔧 Tech Stack
 - **Backend**: Flask, Python 3.8+
 - **AI/ML**: OpenAI GPT-4o-mini, LangChain, LangGraph
 - **Database**: SQLite with dynamic schema support
 - **Search**: FAISS vector store for semantic search
-- **ML Ops**: MLflow for experiment tracking
+- **ML Ops**: MLflow for model management and experiment tracking
 - **Testing**: pytest with comprehensive coverage
 - **CI/CD**: GitHub Actions with automated testing
 
-## Testing & Quality Assurance
+## MLflow Integration
+
+The application uses MLflow for model management and experiment tracking:
+
+### Starting MLflow
+```bash
+# Launch MLflow server (required)
+mlflow ui
+
+# Access MLflow UI
+open http://localhost:5000
+```
+
+### Features
+- **Model Versioning**: Track different versions of the SQL generation model
+- **Experiment Tracking**: Monitor query generation performance
+- **Model Registry**: Centralized model management
+- **Metrics Logging**: Track query success rates and processing times
+
+### MLflow Directory Structure
+```
+mlruns/
+├── 0/                      # Default experiment
+├── experiments/            # Custom experiments  
+└── models/                # Registered models
+    └── sql_generator_model/
+```
+
+## 🧪 Testing & Quality Assurance
 
 ### Run Tests
 ```bash
