@@ -96,7 +96,8 @@ python3 database_manager.py activate bibliotheque
 python3 app.py
 ```
 
-🌐 **Access the application**: [http://localhost:5000](http://localhost:5000)
+🌐 **Access the application**: [http://localhost:5001](http://localhost:5001)
+
 📊 **Monitor experiments**: MLflow UI at [http://localhost:5000](http://localhost:5000) (if running)
 
 ## Database Management
@@ -208,7 +209,7 @@ multilingual-text-2-sql/
 └── .github/workflows/        # CI/CD pipeline
 ```
 
-### 🔧 Tech Stack
+### Tech Stack
 - **Backend**: Flask, Python 3.8+
 - **AI/ML**: OpenAI GPT-4o-mini, LangChain, LangGraph
 - **Database**: SQLite with dynamic schema support
@@ -245,7 +246,7 @@ mlruns/
     └── sql_generator_model/
 ```
 
-## 🧪 Testing & Quality Assurance
+## Testing & Quality Assurance
 
 ### Run Tests
 ```bash
