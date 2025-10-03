@@ -96,7 +96,8 @@ python3 database_manager.py activate bibliotheque
 python3 app.py
 ```
 
-🌐 **Access the application**: [http://localhost:5000](http://localhost:5000)
+🌐 **Access the application**: [http://localhost:5001](http://localhost:5001)
+
 📊 **Monitor experiments**: MLflow UI at [http://localhost:5000](http://localhost:5000) (if running)
 
 ## Database Management
