@@ -1,4 +1,4 @@
-from src.database import setup_database
+from app.database import setup_database
 
 def test_database_connection():
     conn = setup_database()
