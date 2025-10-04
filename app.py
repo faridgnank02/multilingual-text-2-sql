@@ -41,12 +41,12 @@ mlflow.set_tracking_uri(REMOTE_SERVER_URI)
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
 
-# Configuration pour l'upload de fichiers
+# File upload configuration
 UPLOAD_FOLDER = 'temp_uploads'
 ALLOWED_EXTENSIONS = {'csv', 'sql', 'db', 'sqlite', 'sqlite3'}
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB max
 
-# Chargement du modèle et des ressources au démarrage
+# Load model and resources at startup
 conn = setup_database()
 cursor = conn.cursor()
 vector_store = setup_vector_store()
@@ -56,11 +56,11 @@ model_input = [{"conn": conn, "cursor": cursor, "vector_store": vector_store}]
 app_workflow = model.predict(model_input)
 
 def allowed_file(filename):
-    """Vérifie si le fichier a une extension autorisée."""
+    """Check if the file has an allowed extension."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_file_type(filename):
-    """Détermine le type de fichier basé sur l'extension."""
+    """Determine file type based on extension."""
     if not filename:
         return None
     ext = filename.rsplit('.', 1)[1].lower()
@@ -73,28 +73,28 @@ def get_file_type(filename):
     return None
 
 def process_uploaded_file(file, db_name, table_name=None):
-    """Traite le fichier uploadé et l'importe dans le système."""
+    """Process uploaded file and import it into the system."""
     ensure_directories()
     
     if not file or not allowed_file(file.filename):
-        return {"success": False, "error": "Type de fichier non autorisé"}
+        return {"success": False, "error": "File type not allowed"}
     
-    # Créer un dossier temporaire
+    # Create temporary directory
     temp_dir = Path(UPLOAD_FOLDER)
     temp_dir.mkdir(exist_ok=True)
     
     try:
-        # Sauvegarder le fichier temporairement
+        # Save file temporarily
         filename = secure_filename(file.filename)
         temp_file_path = temp_dir / filename
         file.save(str(temp_file_path))
         
-        # Vérifier la taille du fichier
+        # Check file size
         if temp_file_path.stat().st_size > MAX_FILE_SIZE:
             temp_file_path.unlink()
-            return {"success": False, "error": "Fichier trop volumineux (max 50MB)"}
+            return {"success": False, "error": "File too large (max 50MB)"}
         
-        # Traiter selon le type de fichier
+        # Process according to file type
         file_type = get_file_type(filename)
         
         if file_type == 'csv':
@@ -104,18 +104,18 @@ def process_uploaded_file(file, db_name, table_name=None):
         elif file_type == 'sqlite':
             result = copy_database(str(temp_file_path), db_name)
         else:
-            return {"success": False, "error": "Type de fichier non reconnu"}
+            return {"success": False, "error": "File type not recognized"}
         
-        # Nettoyer le fichier temporaire
+        # Clean up temporary file
         temp_file_path.unlink()
         
         return result
         
     except Exception as e:
-        # Nettoyer en cas d'erreur
+        # Clean up on error
         if temp_file_path.exists():
             temp_file_path.unlink()
-        return {"success": False, "error": f"Erreur lors du traitement: {str(e)}"}
+        return {"success": False, "error": f"Processing error: {str(e)}"}
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -124,11 +124,11 @@ def index():
     error_msg = None
     generated_answer = None
     
-    # Récupérer les informations de la base de données active
+    # Get active database information
     active_db_key = get_active_database()
     databases = list_databases()
     active_db_info = databases.get(active_db_key, {})
-    active_db_name = active_db_info.get("name", "Base de données inconnue")
+    active_db_name = active_db_info.get("name", "Unknown database")
 
     conn = setup_database()
     cursor = conn.cursor()
@@ -139,10 +139,10 @@ def index():
     if request.method == "POST":
         action = request.form.get("action", "")
         
-        # Gestion de l'upload de fichier
+        # Handle file upload
         if action == "upload":
             if 'db_file' not in request.files:
-                error_msg = "Aucun fichier sélectionné"
+                error_msg = "No file selected"
             else:
                 file = request.files['db_file']
                 db_name = request.form.get('db_name', '').strip()
@@ -150,32 +150,32 @@ def index():
                 auto_activate = request.form.get('auto_activate') == 'on'
                 
                 if not db_name:
-                    error_msg = "Nom de base de données requis"
+                    error_msg = "Database name required"
                 elif file.filename == '':
-                    error_msg = "Aucun fichier sélectionné"
+                    error_msg = "No file selected"
                 else:
-                    # Traiter le fichier
+                    # Process the file
                     result = process_uploaded_file(file, db_name, table_name if table_name else None)
                     
                     if result.get("success"):
-                        success_msg = result.get("message", "Fichier importé avec succès")
+                        success_msg = result.get("message", "File imported successfully")
                         
-                        # Activer automatiquement la nouvelle base si demandé
+                        # Automatically activate new database if requested
                         if auto_activate:
                             activate_result = set_active_database(db_name)
                             if activate_result.get("success"):
-                                success_msg += f" Base de données '{db_name}' activée."
-                                # Rediriger pour rafraîchir l'affichage de la base active
+                                success_msg += f" Database '{db_name}' activated."
+                                # Redirect to refresh active database display
                                 return redirect(url_for('index'))
                             else:
-                                success_msg += " (Erreur d'activation automatique)"
+                                success_msg += " (Auto-activation error)"
                         
                         generated_answer = success_msg
                     else:
-                        error_msg = result.get("error", "Erreur lors de l'import")
+                        error_msg = result.get("error", "Import error")
         
-        # Gestion de la question utilisateur
-        elif action == "question" or not action:  # action vide pour compatibilité
+        # Handle user question
+        elif action == "question" or not action:  # empty action for compatibility
             question = request.form.get("question", "")
             if question:
                 initial_state = {
@@ -196,7 +196,7 @@ def index():
                     if solution.get("error") == "yes":
                         error_msg = solution.get("messages", [])[-1][1]
                     elif solution.get("no_records_found"):
-                        results = "Aucun résultat trouvé."
+                        results = "No results found."
                     elif solution.get("results") is not None:
                         results = solution["results"]
                 except Exception as e:

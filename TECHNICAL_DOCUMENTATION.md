@@ -418,9 +418,9 @@ tests/
 
 ### 6.4 Monitoring and Observability Infrastructure
 
-The system includes basic monitoring infrastructure through MLflow for experiment tracking, **in the CLI interface**.
+The system includes basic monitoring infrastructure through MLflow for experiment tracking.
 
-**CLI Monitoring (main.py):**
+
 ```python
 # MLflow experiment tracking
 mlflow.set_tracking_uri(REMOTE_SERVER_URI)

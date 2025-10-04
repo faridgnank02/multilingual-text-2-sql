@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Database Manager - Utilitaire pour gérer les bases de données du système SQL multilingue
-Permet d'importer des bases de données externes et de basculer entre elles.
+Database Manager - Utility to manage databases for the multilingual SQL system
+Allows importing external databases and switching between them.
 """
 
 import os
@@ -12,19 +12,19 @@ import json
 from pathlib import Path
 from typing import Dict, List, Optional
 
-# Chemins importants
+# Important paths
 DATA_DIR = Path("data")
 DB_PATH = DATA_DIR / "database.db"
 CUSTOM_DB_DIR = DATA_DIR / "custom_databases"
 DB_CONFIG_FILE = DATA_DIR / "database_config.json"
 
 def ensure_directories():
-    """Crée les répertoires nécessaires s'ils n'existent pas."""
+    """Create necessary directories if they don't exist."""
     DATA_DIR.mkdir(exist_ok=True)
     CUSTOM_DB_DIR.mkdir(exist_ok=True)
 
 def get_database_info(db_path: str) -> Dict:
-    """Récupère les informations sur une base de données."""
+    """Get information about a database."""
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -48,25 +48,25 @@ def get_database_info(db_path: str) -> Dict:
         return {"error": str(e)}
 
 def list_databases() -> Dict:
-    """Liste toutes les bases de données disponibles."""
+    """List all available databases."""
     ensure_directories()
     
     databases = {}
     
-    # Base de données par défaut
+    # Default database
     if DB_PATH.exists():
         databases["default"] = {
-            "name": "Base de données par défaut (Customers/Orders/Products)",
+            "name": "Default database (Customers/Orders/Products)",
             "path": str(DB_PATH),
             "info": get_database_info(str(DB_PATH))
         }
     
-    # Bases de données personnalisées
+    # Custom databases
     if CUSTOM_DB_DIR.exists():
         for db_file in CUSTOM_DB_DIR.glob("*.db"):
             db_key = db_file.stem
             databases[db_key] = {
-                "name": f"Base de données personnalisée : {db_key}",
+                "name": f"Custom database: {db_key}",
                 "path": str(db_file),
                 "info": get_database_info(str(db_file))
             }
@@ -74,7 +74,7 @@ def list_databases() -> Dict:
     return databases
 
 def import_csv_to_database(csv_path: str, db_name: str, table_name: Optional[str] = None) -> Dict:
-    """Importe un fichier CSV dans une nouvelle base de données."""
+    """Import a CSV file into a new database."""
     ensure_directories()
     
     if not table_name:
@@ -83,7 +83,7 @@ def import_csv_to_database(csv_path: str, db_name: str, table_name: Optional[str
     db_path = CUSTOM_DB_DIR / f"{db_name}.db"
     
     try:
-        # Créer la base de données
+        # Create the database
         conn = sqlite3.connect(str(db_path))
         cursor = conn.cursor()
         
@@ -91,14 +91,14 @@ def import_csv_to_database(csv_path: str, db_name: str, table_name: Optional[str
             csv_reader = csv.reader(file)
             headers = next(csv_reader)
             
-            # Créer la table (tous les champs en TEXT pour simplifier)
+            # Create table (all fields as TEXT for simplicity)
             columns_def = ", ".join([f"{header} TEXT" for header in headers])
             cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ({columns_def})")
             
-            # Insérer les données
+            # Insert the data
             placeholders = ", ".join(["?" for _ in headers])
             for row in csv_reader:
-                # Compléter la ligne si elle a moins de colonnes que les headers
+                # Complete the row if it has fewer columns than headers
                 while len(row) < len(headers):
                     row.append("")
                 cursor.execute(f"INSERT INTO {table_name} VALUES ({placeholders})", row[:len(headers)])
@@ -108,7 +108,7 @@ def import_csv_to_database(csv_path: str, db_name: str, table_name: Optional[str
         
         return {
             "success": True,
-            "message": f"CSV importé avec succès dans la base de données '{db_name}' (table '{table_name}')",
+            "message": f"CSV imported successfully into database '{db_name}' (table '{table_name}')",
             "db_path": str(db_path),
             "info": get_database_info(str(db_path))
         }
@@ -116,7 +116,7 @@ def import_csv_to_database(csv_path: str, db_name: str, table_name: Optional[str
         return {"success": False, "error": str(e)}
 
 def import_sql_to_database(sql_path: str, db_name: str) -> Dict:
-    """Importe un fichier SQL dans une nouvelle base de données."""
+    """Import a SQL file into a new database."""
     ensure_directories()
     
     db_path = CUSTOM_DB_DIR / f"{db_name}.db"
@@ -133,7 +133,7 @@ def import_sql_to_database(sql_path: str, db_name: str) -> Dict:
         
         return {
             "success": True,
-            "message": f"Script SQL importé avec succès dans la base de données '{db_name}'",
+            "message": f"SQL script imported successfully into database '{db_name}'",
             "db_path": str(db_path),
             "info": get_database_info(str(db_path))
         }
@@ -141,7 +141,7 @@ def import_sql_to_database(sql_path: str, db_name: str) -> Dict:
         return {"success": False, "error": str(e)}
 
 def copy_database(source_path: str, db_name: str) -> Dict:
-    """Copie une base de données SQLite existante."""
+    """Copy an existing SQLite database."""
     ensure_directories()
     
     db_path = CUSTOM_DB_DIR / f"{db_name}.db"
@@ -150,7 +150,7 @@ def copy_database(source_path: str, db_name: str) -> Dict:
         shutil.copy2(source_path, str(db_path))
         return {
             "success": True,
-            "message": f"Base de données copiée avec succès sous le nom '{db_name}'",
+            "message": f"Database copied successfully as '{db_name}'",
             "db_path": str(db_path),
             "info": get_database_info(str(db_path))
         }
@@ -158,25 +158,25 @@ def copy_database(source_path: str, db_name: str) -> Dict:
         return {"success": False, "error": str(e)}
 
 def set_active_database(db_key: str) -> Dict:
-    """Change la base de données active utilisée par l'application."""
+    """Change the active database used by the application."""
     ensure_directories()
     
     databases = list_databases()
     if db_key not in databases:
-        return {"success": False, "error": f"Base de données '{db_key}' non trouvée"}
+        return {"success": False, "error": f"Database '{db_key}' not found"}
     
     source_path = databases[db_key]["path"]
     
     try:
-        # Sauvegarder la base actuelle si elle existe
+        # Backup current database if it exists
         if DB_PATH.exists():
             backup_path = DATA_DIR / "database_backup.db"
             shutil.copy2(str(DB_PATH), str(backup_path))
         
-        # Copier la nouvelle base de données
+        # Copy the new database
         shutil.copy2(source_path, str(DB_PATH))
         
-        # Sauvegarder la configuration
+        # Save configuration
         config = {"active_database": db_key}
         with open(DB_CONFIG_FILE, 'w') as f:
             json.dump(config, f, indent=2)

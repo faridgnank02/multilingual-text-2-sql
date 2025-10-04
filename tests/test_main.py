@@ -7,7 +7,7 @@ def test_main_cli_help():
     if not os.getenv("OPENAI_API_KEY"):
         pytest.skip("OpenAI API key not available - skipping main.py test")
     
-    # Vérifie que le script main.py s'exécute sans erreur de syntaxe
+    # Check that main.py script runs without syntax errors
     process = subprocess.Popen(
         ["python", "-c", "import main; print('Import successful')"],
         stdout=subprocess.PIPE,
@@ -16,10 +16,10 @@ def test_main_cli_help():
     )
     try:
         stdout, stderr = process.communicate(timeout=5)
-        # On teste juste que l'import fonctionne, pas l'exécution complète
+        # We only test that the import works, not the complete execution
         assert process.returncode == 0 or "Import successful" in stdout or len(stderr) == 0
     except subprocess.TimeoutExpired:
         process.kill()
-        # En cas de timeout, on considère que le fichier est au moins syntaxiquement correct
-        # si on arrive jusqu'ici sans erreur d'import
+        # In case of timeout, we consider the file is at least syntactically correct
+        # if we get here without import errors
         pass
