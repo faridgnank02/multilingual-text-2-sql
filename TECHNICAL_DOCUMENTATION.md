@@ -7,7 +7,7 @@
 - **Data:** SQLite, CSV, SQL scripts, JSON configuration
 - **NLP:** LangChain, Vector similarity search, Multilingual processing
 - **Infrastructure:** MLflow (model management), Docker, Kubernetes-ready
-- **Monitoring:** MLflow experiment tracking, performance metrics, logging
+- **Monitoring:** MLflow experiment tracking (CLI only), basic logging
 
 **Key Concepts:** #NLP #MachineLearning #LangGraph #StateManagement #VectorSearch #RAG #MultilingualProcessing #SQLGeneration #DatabaseManagement #MLOps
 
@@ -44,7 +44,7 @@ class WorkflowManager:
 
 The project implements a modular microservices-inspired architecture where each component handles a specific aspect of the text-to-SQL conversion process. The main components include workflow orchestration, language processing, database management, vector search, and model lifecycle management.
 
-Users can interact with the system through both a web interface built with Flask and a command-line interface for developers. The REST API endpoints enable programmatic access for integration into other applications.
+Users can interact with the system through both a web interface built with Flask and a command-line interface for developers. The Flask interface uses form-based interactions rather than REST API endpoints.
 
 ```python
 # Main application structure
@@ -165,7 +165,7 @@ def get_workflow(conn, cursor, vector_store):
     # Creates 9-node workflow with error recovery
     def translate_input(state: GraphState) -> GraphState: ...
     def pre_safety_check(state: GraphState) -> GraphState: ...
-    # ... 7 other workflow nodes
+    # ...
     
     return StateGraph(GraphState).compile()
 ```
@@ -329,7 +329,7 @@ class ModelManager:
     def _verify_model_health(self) -> bool
     def get_model_info(self) -> Dict
 ```
-```
+
 
 ### 5.4 Deployment Strategy
 
@@ -414,22 +414,29 @@ tests/
 - **Structure validation**: Project architecture verification
 - **Import verification**: Module loading without external dependencies
 
-**Note**: GitHub Actions workflows are not currently implemented but the test suite is designed to be CI/CD compatible.
+
 
 ### 6.4 Monitoring and Observability Infrastructure
 
-The system includes monitoring infrastructure based on MLflow for performance and experiment tracking. Monitoring relies on integrated MLflow and Flask capabilities to collect basic metrics.
+The system includes basic monitoring infrastructure through MLflow for experiment tracking, **in the CLI interface**.
 
+**CLI Monitoring (main.py):**
 ```python
 # MLflow experiment tracking
 mlflow.set_tracking_uri(REMOTE_SERVER_URI)
 mlflow.set_experiment(EXPERIMENT_NAME)
 mlflow.langchain.autolog()
 
-with mlflow.start_run():
+with mlflow.start_run(run_name=f"sql_generation_run_{run_idx}"):
     mlflow.log_param("question", question)
+    mlflow.log_param("database_tables", str([t[0] for t in tables]))
     mlflow.log_metric("duration_seconds", duration)
+    mlflow.log_param("sql_query", sql_query or "(No SQL returned)")
+    if translated_input:
+        mlflow.log_param("translated_input", translated_input)
 ```
+
+
 
 ### 6.5 Performance Optimization and Scaling
 
@@ -444,84 +451,9 @@ ALLOWED_EXTENSIONS = {'csv', 'sql', 'db', 'sqlite', 'sqlite3'}
 
 The system uses Kubernetes scaling capabilities for production with resource configuration and automatic health checks.
 
-## 7. Current Implementation Status and Limitations
+## 7. Automated Testing and Quality Assurance
 
-### 7.0 System Limitations
-
-While comprehensive, the current implementation has some important limitations:
-
-**Technical Limitations:**
-- **No REST API**: The system uses Flask forms instead of REST endpoints
-- **Single-threaded**: No concurrent request handling implemented
-- **Local-only**: Designed for local development, not distributed deployment
-- **SQLite-only**: Limited to SQLite databases (no PostgreSQL, MySQL support)
-- **File size limits**: 50MB maximum for uploaded files
-
-**Production Considerations:**
-- **MLflow dependency**: Requires MLflow server to be running
-- **API costs**: Each query consumes OpenAI API credits
-- **No caching**: Repeated queries are processed each time
-- **Limited monitoring**: Basic MLflow tracking only
-- **No user management**: Single-user system design
-
-### 7.1 Local Development Environment
-
-The system is currently implemented and tested for local development with comprehensive setup automation. The implementation includes production-ready components with containerization support and monitoring capabilities.
-
-```python
-class SystemInstaller:
-    def setup_environment(self)
-    def _create_virtual_environment(self) 
-    def _install_dependencies(self)
-```
-
-The development environment includes automated MLflow server management, database initialization, and vector store setup with comprehensive error handling and validation.
-
-### 7.2 Production-Ready Components
-
-The system includes several production-ready components, with some limitations:
-
-**Implemented Components:**
-- **Containerized Architecture**: Basic Docker configuration available
-- **Database Management**: Dynamic SQLite database switching with metadata extraction
-- **Security Framework**: Multi-layer validation and injection prevention
-- **Test Suite**: Comprehensive testing framework for all components
-- **MLflow Integration**: Complete model lifecycle management
-
-**Development-Stage Components:**
-- **Kubernetes Manifests**: Basic K8s files provided but not production-tested
-- **Monitoring**: Limited to MLflow experiment tracking
-- **Scaling**: Single-instance Flask deployment only
-- **API**: Form-based interface, no REST API implemented
-
-```python
-@dataclass
-class ProductionConfig:
-    mlflow_tracking_uri: str = "http://mlflow-service:5000"
-    database_path: str = "/data/databases"
-    vector_store_path: str = "/data/vector_store"
-    api_rate_limit: int = 100
-    max_concurrent_requests: int = 50
-    security_validation: bool = True
-    monitoring_enabled: bool = True
-```
-
-### 7.3 Testing and Quality Assurance
-
-The system includes comprehensive testing frameworks covering all components:
-
-```python
-class TestSuite:
-    def run_comprehensive_tests(self)
-    def _run_unit_tests(self)
-    def _run_integration_tests(self)
-```
-
-The testing framework includes mock API keys for CI/CD environments, comprehensive coverage reporting, and automated regression testing.
-
-## 8. Automated Testing and Quality Assurance
-
-### 8.1 Automated Testing Infrastructure
+### 7.1 Automated Testing Infrastructure
 
 The project implements a comprehensive automated test suite with GitHub Actions, covering all critical aspects of the system.
 
@@ -536,23 +468,35 @@ tests/
 ```
 
 **Implemented Test Types:**
-- **Unit Tests**: Individual component validation
-- **Integration Tests**: Complete workflow verification
-- **Security Tests**: Protection mechanism validation
-- **Import/Export Tests**: Data format verification
-- **Robustness Tests**: Error handling and edge cases
+- **Unit Tests**: Individual component validation (database, vector store)
+- **Integration Tests**: Complete workflow verification with OpenAI API
+- **Import Tests**: Module loading without external dependencies
+- **Structure Tests**: Project file and directory validation
+- **API-Free Tests**: Core functionality without OpenAI API key
+- **CLI Tests**: Command-line interface testing with timeout handling
 
-### 8.2 GitHub Actions - CI/CD Pipeline
+### 7.2 GitHub Actions - CI/CD Pipeline
 
 **Automated Test Workflow (.github/workflows/tests.yml):**
 The pipeline runs automatically on every push and pull request:
 
 ```yaml
-# Example CI/CD structure (not implemented)
-on: [push, pull_request]
-steps:
-  - name: Setup test environment
-  - name: Run pytest tests
+name: Tests
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+    
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.12
+    - name: Install dependencies
+    - name: Create test environment  
+    - name: Run tests with pytest
 ```
 
 **Deployment Workflow (.github/workflows/deploy.yml):**
@@ -561,17 +505,18 @@ steps:
 - Code integrity validation
 - Kubernetes deployment preparation
 
-### 8.3 Stratégies de Test par Composant
+### 7.3 Component Testing Strategies
 
-**Tests Base de Données (test_database.py):**
+**Database Tests (test_database.py):**
 ```python
 def test_database_connection():
     conn = setup_database()
     assert conn is not None
     # Validates database setup and table creation
+    # Tests basic query execution on existing tables
 ```
 
-**Tests Workflow (test_workflow.py):**
+**Workflow Tests (test_workflow.py):**
 ```python
 def test_workflow_invoke():
     # Skips if no valid OpenAI API key
@@ -580,13 +525,14 @@ def test_workflow_invoke():
     assert result is not None
 ```
 
-**Tests Structure Projet (test_basic_functionality.py):**
+**Project Structure Tests (test_basic_functionality.py):**
 ```python
 def test_project_structure():
     # Validates presence of required project files
+    # Tests import capabilities without API dependencies
 ```
 
-### 8.4 Test Environment Management
+### 7.4 Test Environment Management
 
 **CI/CD Environment Simulation:**
 - Use of dummy API keys for automated tests
@@ -600,7 +546,7 @@ def test_app_import_without_openai():
     # Tests basic functionality without OpenAI API key
 ```
 
-### 8.5 Test Metrics and Coverage
+### 7.5 Test Metrics and Coverage
 
 **Current Coverage:**
 - **Database Tests**: 100% of critical operations
@@ -615,9 +561,9 @@ def test_app_import_without_openai():
 python -m pytest tests/ -v --tb=short
 ```
 
-## 9. Testing Guide and Repository Access
+## 8. Testing Guide and Repository Access
 
-### 9.1 Repository Information
+### 8.1 Repository Information
 
 The Multilingual Text-to-SQL Generator project is available on GitHub at:
 ```
@@ -630,7 +576,7 @@ git clone https://github.com/faridgnank02/multilingual-text-2-sql.git
 cd multilingual-text-2-sql
 ```
 
-### 9.2 Quick Installation and Setup
+### 8.2 Quick Installation and Setup
 
 The project includes automated installation scripts for rapid deployment:
 
@@ -651,21 +597,21 @@ The application will be available at `http://localhost:5001` with MLflow monitor
 
 **Note**: The Flask app runs on port 5001 (as defined in `app.py`) while MLflow UI runs on the default port 5000.
 
-### 9.3 Testing Core Functionality
+### 8.3 Testing Core Functionality
 
 **Web Interface Testing:**
 1. Navigate to `http://localhost:5001`
-2. Test multilingual input with questions like:
-   - "Combien de clients avons-nous ?" (French)
-   - "How many orders were placed last month?" (English)
-   - "¿Cuántos productos tenemos?" (Spanish)
+2. Test multilingual input with questions appropriate to the active database:
+   - For Netflix database: "Quel titre a le nom le plus long ?" (French)
+   - For Netflix database: "How many titles were watched in 2021?" (English)
+   - For other databases: Switch database first using database manager
 3. Upload custom databases using the drag-and-drop interface
 4. Switch between different databases and verify schema detection
 
 **Form-based Testing:**
 ```bash
-# Query testing
-curl -X POST http://localhost:5001/ -F "action=question" -F "question=How many customers?"
+# Query testing (adapted to current Netflix database)
+curl -X POST http://localhost:5001/ -F "action=question" -F "question=What titles were watched?"
 
 # File upload testing  
 curl -X POST http://localhost:5001/ -F "action=upload" -F "db_file=@examples/employes.csv"
@@ -676,23 +622,31 @@ curl -X POST http://localhost:5001/ -F "action=upload" -F "db_file=@examples/emp
 # Launch interactive CLI
 python main.py
 
-# Enter test queries
-> How many customers are there?
-> Montrez-moi les commandes de ce mois
+# Enter test queries appropriate to active database
+> What Netflix titles have the longest names?
+> Combien de titres ont été regardés ?
 > quit
 ```
 
-### 9.4 Performance and Load Testing
+### 8.4 Active Database Management
 
-Test system performance with various content types and configurations:
+**Current Active Database:**
+The system currently uses "Netflix history" database with NetflixViewingHistory table (1,193 records).
 
-```python
-class PerformanceTester:
-    def run_load_test(self, concurrent_users=10, duration_minutes=5)
-    def _execute_concurrent_requests(self, queries, users, duration)
+```bash
+# Check current active database
+python database_manager.py list
+
+# Switch to different database (example: school database)
+python database_manager.py set-active --db-key ecole
+
+# Verify database switch
+python database_manager.py list
 ```
 
-### 9.5 Database Import Testing
+**Important:** Questions must match the active database schema. For Netflix database, ask about titles and dates, not customers or orders.
+
+### 8.5 Database Import Testing
 
 Test the multi-format database import capabilities:
 
@@ -708,16 +662,7 @@ python database_manager.py import-sql --file examples/bibliotheque.sql --name li
 python database_manager.py set-active --db-key library_db
 ```
 
-### 9.6 Monitoring and Analytics Testing
-
-Verify monitoring capabilities and performance tracking:
-
-```python
-# Monitor via MLflow UI at http://localhost:5000
-# No health endpoint currently implemented
-```
-
-### 9.7 Troubleshooting and Common Issues
+### 8.6 Troubleshooting and Common Issues
 
 **Model Loading Issues:**
 - Ensure MLflow server is running: `mlflow ui`
@@ -734,6 +679,11 @@ Verify monitoring capabilities and performance tracking:
 - Check active database: `python database_manager.py list`
 - Validate database schema: `python database_manager.py info <db_name>`
 
+**Context Check Issues:**
+- If questions are rejected as "not related to database", verify question matches active database schema
+- Netflix database only has Title and Date columns - ask about titles, not customers/orders
+- Switch database if needed: `python database_manager.py set-active --db-key <database_name>`
+
 **Performance Issues:**
 - Monitor system resources during processing
 - Check vector store initialization: verify `data/vector_store/` exists
@@ -741,34 +691,55 @@ Verify monitoring capabilities and performance tracking:
 
 The system includes comprehensive logging and error reporting to help diagnose issues quickly. Check application logs for detailed troubleshooting information.
 
-## 10. Future Improvements and Roadmap
+## 9. Limitations and Future Improvements
 
-### 10.1 Recommended Enhancements
+### 9.1 Current System Limitations
 
-**High Priority:**
+While comprehensive, the current implementation has some important limitations:
+
+**Technical Limitations:**
+- **No REST API**: The system uses Flask forms instead of REST endpoints
+- **Single-threaded**: No concurrent request handling implemented
+- **SQLite-only**: Limited to SQLite databases (no PostgreSQL, MySQL support)
+- **File size limits**: 50MB maximum for uploaded files
+- **No caching**: Repeated queries are processed each time
+
+**Production Considerations:**
+- **MLflow dependency**: Requires MLflow server to be running on port 5000
+- **API costs**: Each query consumes OpenAI API credits
+- **Limited monitoring**: MLflow tracking only available in CLI interface
+- **No web monitoring**: Flask app has no performance tracking
+- **Context checking limitations**: Strict relevance checking may reject valid questions
+- **Local deployment focus**: Optimized for local development
+
+### 9.2 Possible Enhancements
+
+**High Impact Improvements:**
 - **REST API Implementation**: Add proper REST endpoints for programmatic access
 - **Database Support**: Extend beyond SQLite to PostgreSQL, MySQL
 - **Caching System**: Implement query result caching to reduce API costs
-- **User Authentication**: Add multi-user support with authentication
-- **Async Processing**: Implement asynchronous query processing
-
-**Medium Priority:**
-- **Advanced Monitoring**: Add Prometheus/Grafana integration
-- **Real CI/CD**: Implement GitHub Actions workflows
-- **Performance Optimization**: Add connection pooling and query optimization
-- **Enhanced Security**: Add rate limiting and advanced input validation
-- **Result Export**: Add CSV/Excel export capabilities
-
-**Low Priority:**
+- **Advanced Monitoring**: Add Prometheus/Grafana integration beyond MLflow
 - **Natural Language Explanations**: Enhance query explanations
-- **Query History**: Add user query history and favorites
-- **Advanced Analytics**: Add usage analytics and insights
-- **Multi-tenant Support**: Enable SaaS deployment model
 
-### 10.2 Architecture Evolution
+
+### 9.3 Conclusion
 
 The system is well-positioned for evolution toward a full production system:
-- **Modular Design**: Easy to extract components into microservices
-- **MLflow Foundation**: Strong basis for MLOps practices
-- **Comprehensive Testing**: Solid foundation for continuous integration
-- **Security-First**: Good security practices already implemented
+
+**Modular Design Benefits:**
+- Easy to extract components into microservices
+- Strong separation of concerns enables independent scaling
+- LangGraph workflow can be deployed as standalone service
+
+**MLflow Foundation:**
+- Comprehensive model lifecycle management already implemented
+- Strong basis for advanced MLOps practices
+- Version control and experiment tracking established
+
+**Production Readiness:**
+- Docker containerization available
+- Kubernetes manifests provided
+- Security validation framework implemented
+- Comprehensive testing suite established
+
+The current architecture provides a solid foundation for scaling to enterprise-level deployments with minimal refactoring required.

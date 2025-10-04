@@ -1,7 +1,12 @@
 import os
+import sys
 import logging
 import mlflow
 from dotenv import load_dotenv
+
+# Add current directory and app directory to Python path for MLflow model loading
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "app")))
 
 from app.database import setup_database
 from app.vector_store import setup_vector_store

@@ -31,8 +31,12 @@ from database_manager import (
 load_dotenv()
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY", "")
 
+# Add current directory and app directory to Python path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "app")))
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "app")))
+# Configure MLflow tracking URI
+mlflow.set_tracking_uri(REMOTE_SERVER_URI)
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
