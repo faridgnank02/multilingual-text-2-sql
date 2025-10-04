@@ -1,14 +1,35 @@
 import logging
 import os
 import sqlite3
+import json
+from pathlib import Path
 from typing import Optional
 
-DB_PATH = "../data/database.db"
+def get_active_database_path() -> str:
+    """Get the path to the currently active database."""
+    data_dir = Path(os.path.dirname(__file__)).parent / "data"
+    config_file = data_dir / "database_config.json"
+    databases_dir = data_dir / "databases"
+    
+    # Read active database from config
+    active_db = "default"  # default fallback
+    if config_file.exists():
+        try:
+            with open(config_file, 'r') as f:
+                config = json.load(f)
+                active_db = config.get("active_database", "default")
+        except:
+            pass
+    
+    # Return path to active database
+    db_path = databases_dir / f"{active_db}.db"
+    return str(db_path)
 
-def create_connection(db_file: str = DB_PATH) -> sqlite3.Connection:
+def create_connection(db_file: str = None) -> sqlite3.Connection:
     """Create a database connection to the SQLite database."""
+    if db_file is None:
+        db_file = get_active_database_path()
     conn = sqlite3.connect(db_file)
-    # optional: return rows as tuples (default) or dicts if you want
     return conn
 
 def create_tables(conn: sqlite3.Connection) -> None:
@@ -143,17 +164,22 @@ def setup_database(logger: Optional[logging.Logger] = None) -> sqlite3.Connectio
     """Setup the database and return the connection."""
     if logger is None:
         logger = logging.getLogger(__name__)
-    # Chemin absolu du dossier data
-    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data"))
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-    db_file = os.path.join(data_dir, "database.db")
+    
+    # Create directories if they don't exist
+    data_dir = Path(os.path.dirname(__file__)).parent / "data"
+    databases_dir = data_dir / "databases"
+    data_dir.mkdir(exist_ok=True)
+    databases_dir.mkdir(exist_ok=True)
+    
+    # Get active database path
+    db_file = get_active_database_path()
     db_exists = os.path.exists(db_file)
     conn = create_connection(db_file)
+    
     if not db_exists:
-        logger.info("Setting up the database...")
+        logger.info(f"Setting up the database at {db_file}...")
         create_tables(conn)
         populate_tables(conn)
     else:
-        logger.info("Database already exists. Skipping setup.")
+        logger.info(f"Database already exists at {db_file}. Skipping setup.")
     return conn

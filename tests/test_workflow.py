@@ -1,8 +1,8 @@
 import os
 import pytest
-from app.database import setup_database
-from app.vector_store import setup_vector_store
-from app.workflow import get_workflow
+from src.database import setup_database
+from src.vector_store import setup_vector_store
+from src.workflow import get_workflow
 
 def test_workflow_invoke():
     # Skip test if no OpenAI API key is available or if it's a dummy key (e.g., in CI environment)

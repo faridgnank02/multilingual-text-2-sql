@@ -70,6 +70,17 @@ Real-time monitoring tracks system performance, user interactions, and model eff
 
 The system is optimized for production deployment with Docker containerization, Kubernetes orchestration, and comprehensive CI/CD pipelines using GitHub Actions.
 
+### 1.5 Startup Sequence
+
+The application requires a specific initialization order for proper functionality:
+
+1. **Database Initialization**: `src/database.py` - Sets up SQLite database with default tables
+2. **Vector Store Preparation**: `src/vector_store.py` - Loads or creates FAISS vector store
+3. **Model Registration**: `register_model.py` - **MANDATORY** - Registers the LangGraph workflow in MLflow
+4. **Application Launch**: `app.py` or `main.py` - Starts the web or CLI interface
+
+This sequence ensures all dependencies are properly initialized before the main application starts.
+
 ## 2. Data Processing and Workflow Pipeline
 
 ### 2.1 Multi-Language Input Processing
@@ -578,6 +589,8 @@ cd multilingual-text-2-sql
 
 ### 8.2 Quick Installation and Setup
 
+> **Note:** For complete startup instructions, see [STARTUP_GUIDE.md](STARTUP_GUIDE.md)
+
 The project includes automated installation scripts for rapid deployment:
 
 ```bash
@@ -665,9 +678,9 @@ python database_manager.py set-active --db-key library_db
 ### 8.6 Troubleshooting and Common Issues
 
 **Model Loading Issues:**
-- Ensure MLflow server is running: `mlflow ui`
-- Verify model registration: `python register_model.py`
-- Check MLflow experiments in the web UI
+- Register MLflow model first: `python3 register_model.py`
+- Verify model registration is successful
+- Check MLflow experiments in the web UI (optional): `mlflow ui`
 
 **API Configuration:**
 - Validate OpenAI API key: `echo $OPENAI_API_KEY`
@@ -675,7 +688,7 @@ python database_manager.py set-active --db-key library_db
 - Check rate limits and quotas
 
 **Database Issues:**
-- Verify database files exist in `data/custom_databases/`
+- Verify database files exist in `data/databases/`
 - Check active database: `python database_manager.py list`
 - Validate database schema: `python database_manager.py info <db_name>`
 
@@ -685,7 +698,6 @@ python database_manager.py set-active --db-key library_db
 - Switch database if needed: `python database_manager.py set-active --db-key <database_name>`
 
 **Performance Issues:**
-- Monitor system resources during processing
 - Check vector store initialization: verify `data/vector_store/` exists
 - Enable debug logging: set `PYTHONPATH` and run with `-v` flag
 
@@ -705,12 +717,10 @@ While comprehensive, the current implementation has some important limitations:
 - **No caching**: Repeated queries are processed each time
 
 **Production Considerations:**
-- **MLflow dependency**: Requires MLflow server to be running on port 5000
+- **MLflow model registration**: Must run `register_model.py` before application startup
 - **API costs**: Each query consumes OpenAI API credits
-- **Limited monitoring**: MLflow tracking only available in CLI interface
-- **No web monitoring**: Flask app has no performance tracking
 - **Context checking limitations**: Strict relevance checking may reject valid questions
-- **Local deployment focus**: Optimized for local development
+- **Local deployment focus**: Optimized for local development, MLflow tracking server is auto-managed
 
 ### 9.2 Possible Enhancements
 

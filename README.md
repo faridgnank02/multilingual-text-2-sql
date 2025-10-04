@@ -40,6 +40,8 @@ A comprehensive web application that converts natural language questions (in mul
 
 ## Quick Start
 
+> 📖 **Detailed Setup Guide:** For complete startup instructions, see [STARTUP_GUIDE.md](docs/STARTUP_GUIDE.md)
+
 ### Prerequisites
 - Python 3.8+
 - OpenAI API key
@@ -68,13 +70,27 @@ export OPENAI_API_KEY="your-api-key-here"
 # On Windows: set OPENAI_API_KEY=your-api-key-here
 ```
 
-### 4. Start MLflow Server
-```bash
-# Launch MLflow UI (required for model loading)
-mlflow ui
+### 4. Initialize and Launch
 
-# MLflow will be available at http://localhost:5000
-# Keep this terminal open and proceed in a new terminal
+#### Option A: Automated Startup (Recommended)
+```bash
+# Run the automated startup script
+./start.sh
+```
+
+#### Option B: Manual Startup
+```bash
+# 1. Register the MLflow model (required)
+python3 register_model.py
+
+# 2. Launch application
+python3 app.py
+```
+
+#### Option C: CLI Interface
+```bash
+# After model registration
+python3 main.py
 ```
 
 ### 5. Launch Application
@@ -115,7 +131,7 @@ Upload databases directly through the web interface:
 #### Import Data
 ```bash
 # Import CSV file
-python3 database_manager.py import data.csv my_database
+python3 app.database_manager.py import data.csv my_database
 
 # Import SQL script
 python3 database_manager.py import schema.sql my_database
@@ -204,8 +220,9 @@ multilingual-text-2-sql/
 │   ├── test_vector_store.py
 │   ├── test_workflow.py
 │   └── test_main.py
-├── examples/                 #  Sample databases
+├── examples/                 #  Sample database files
 ├── data/                     #  Database and vector store storage
+│   └── databases/            #    All databases in one directory
 └── .github/workflows/        # CI/CD pipeline
 ```
 

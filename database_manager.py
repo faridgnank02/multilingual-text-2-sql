@@ -14,14 +14,13 @@ from typing import Dict, List, Optional
 
 # Important paths
 DATA_DIR = Path("data")
-DB_PATH = DATA_DIR / "database.db"
-CUSTOM_DB_DIR = DATA_DIR / "custom_databases"
+DATABASES_DIR = DATA_DIR / "databases"
 DB_CONFIG_FILE = DATA_DIR / "database_config.json"
 
 def ensure_directories():
     """Create necessary directories if they don't exist."""
     DATA_DIR.mkdir(exist_ok=True)
-    CUSTOM_DB_DIR.mkdir(exist_ok=True)
+    DATABASES_DIR.mkdir(exist_ok=True)
 
 def get_database_info(db_path: str) -> Dict:
     """Get information about a database."""
@@ -53,23 +52,22 @@ def list_databases() -> Dict:
     
     databases = {}
     
-    # Default database
-    if DB_PATH.exists():
-        databases["default"] = {
-            "name": "Default database (Customers/Orders/Products)",
-            "path": str(DB_PATH),
-            "info": get_database_info(str(DB_PATH))
-        }
-    
-    # Custom databases
-    if CUSTOM_DB_DIR.exists():
-        for db_file in CUSTOM_DB_DIR.glob("*.db"):
+    # All databases in the databases directory
+    if DATABASES_DIR.exists():
+        for db_file in DATABASES_DIR.glob("*.db"):
             db_key = db_file.stem
-            databases[db_key] = {
-                "name": f"Custom database: {db_key}",
-                "path": str(db_file),
-                "info": get_database_info(str(db_file))
-            }
+            if db_key == "default":
+                databases[db_key] = {
+                    "name": "Default database (Customers/Orders/Products)",
+                    "path": str(db_file),
+                    "info": get_database_info(str(db_file))
+                }
+            else:
+                databases[db_key] = {
+                    "name": f"Custom database: {db_key}",
+                    "path": str(db_file),
+                    "info": get_database_info(str(db_file))
+                }
     
     return databases
 
@@ -80,7 +78,7 @@ def import_csv_to_database(csv_path: str, db_name: str, table_name: Optional[str
     if not table_name:
         table_name = Path(csv_path).stem
     
-    db_path = CUSTOM_DB_DIR / f"{db_name}.db"
+    db_path = DATABASES_DIR / f"{db_name}.db"
     
     try:
         # Create the database
@@ -119,7 +117,7 @@ def import_sql_to_database(sql_path: str, db_name: str) -> Dict:
     """Import a SQL file into a new database."""
     ensure_directories()
     
-    db_path = CUSTOM_DB_DIR / f"{db_name}.db"
+    db_path = DATABASES_DIR / f"{db_name}.db"
     
     try:
         conn = sqlite3.connect(str(db_path))
@@ -144,7 +142,7 @@ def copy_database(source_path: str, db_name: str) -> Dict:
     """Copy an existing SQLite database."""
     ensure_directories()
     
-    db_path = CUSTOM_DB_DIR / f"{db_name}.db"
+    db_path = DATABASES_DIR / f"{db_name}.db"
     
     try:
         shutil.copy2(source_path, str(db_path))
@@ -165,26 +163,16 @@ def set_active_database(db_key: str) -> Dict:
     if db_key not in databases:
         return {"success": False, "error": f"Database '{db_key}' not found"}
     
-    source_path = databases[db_key]["path"]
-    
     try:
-        # Backup current database if it exists
-        if DB_PATH.exists():
-            backup_path = DATA_DIR / "database_backup.db"
-            shutil.copy2(str(DB_PATH), str(backup_path))
-        
-        # Copy the new database
-        shutil.copy2(source_path, str(DB_PATH))
-        
-        # Save configuration
+        # Save configuration - just store which database is active
         config = {"active_database": db_key}
         with open(DB_CONFIG_FILE, 'w') as f:
             json.dump(config, f, indent=2)
         
         return {
             "success": True,
-            "message": f"Base de données '{databases[db_key]['name']}' activée avec succès",
-            "info": get_database_info(str(DB_PATH))
+            "message": f"Database '{databases[db_key]['name']}' activated successfully",
+            "info": databases[db_key]["info"]
         }
     except Exception as e:
         return {"success": False, "error": str(e)}

@@ -42,7 +42,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
 
 # File upload configuration
-UPLOAD_FOLDER = 'temp_uploads'
+UPLOAD_FOLDER = 'data/databases'
 ALLOWED_EXTENSIONS = {'csv', 'sql', 'db', 'sqlite', 'sqlite3'}
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB max
 

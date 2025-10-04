@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 def test_database_manager_import():
     """Test that database manager can be imported and basic functions work."""
     try:
-        import database_manager
+        import src.database_manager as database_manager
         assert hasattr(database_manager, 'list_databases')
         assert hasattr(database_manager, 'get_active_database')
         assert hasattr(database_manager, 'ensure_directories')
@@ -25,8 +25,8 @@ def test_app_import_without_openai():
     
     try:
         # Test basic imports
-        from app.database import setup_database
-        from app.definitions import EXPERIMENT_NAME, MODEL_ALIAS
+        from src.database import setup_database
+        from src.definitions import EXPERIMENT_NAME, MODEL_ALIAS
         
         # Test database setup (should work without OpenAI)
         conn = setup_database()
@@ -63,7 +63,7 @@ def test_project_structure():
 
 def test_database_manager_basic_functions():
     """Test database manager basic functions without external dependencies."""
-    import database_manager
+    import src.database_manager as database_manager
     
     # Test ensure_directories
     database_manager.ensure_directories()

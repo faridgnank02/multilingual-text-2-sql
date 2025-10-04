@@ -1,4 +1,4 @@
-from app.database import setup_database
+from src.database import setup_database
 
 def test_database_connection():
     conn = setup_database()
@@ -16,5 +16,4 @@ def test_database_connection():
     count = cursor.fetchone()[0]
     assert count >= 0, f"Should be able to query table {first_table}"
     
-    conn.close()
     conn.close()

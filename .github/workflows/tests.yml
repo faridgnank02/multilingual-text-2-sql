@@ -27,8 +27,7 @@ jobs:
     - name: Create test environment
       run: |
         # Create necessary directories
-        mkdir -p data/custom_databases
-        mkdir -p temp_uploads
+        mkdir -p data/databases
         
         # Set dummy OpenAI key for tests that check the environment
         echo "OPENAI_API_KEY=sk-dummy-key-for-testing" > .env
