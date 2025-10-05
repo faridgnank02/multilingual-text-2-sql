@@ -1,5 +1,10 @@
 # 🌐 Multilingual Text-to-SQL Generator
 
+<div align="center">
+  <img src="data/assets/demo-sql.gif" alt="Multilingual Text-to-SQL Demo" width="800"/>
+  <p><em>Ask questions in any language - get SQL results instantly!</em></p>
+</div>
+
 A comprehensive web application that converts natural language questions (in multiple languages) into SQL queries and executes them on customizable databases. Built with Flask, LangChain, LangGraph, OpenAI GPT-4o-mini, and FAISS vector search.
 
 ## Key Features
