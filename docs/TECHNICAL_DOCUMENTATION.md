@@ -112,11 +112,8 @@ The core processing engine implements a sophisticated state machine using LangGr
 8. **run_query** - Executes the validated query
 9. **translate_answer** - Translates response to original language
 
+![Workflow Diagram](../data/assets/workflow_diagram.png)
 
-<div align="center">
-  <img src="data/assets/sql_agent_with_safety_checks.png" alt="" width="800"/>
-  <p><em>Ask questions in any language - get SQL results instantly!</em></p>
-</div>
 
 
 ```python
